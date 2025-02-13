@@ -143,7 +143,10 @@ médicament dans le panier actuel.
    - À côté de chaque médicament, une icône de panier (ou un bouton) pour ajouter ce médicament au panier.
 
 Visuellement, l’écran est donc divisé en deux colonnes principales :
-- **Colonne de gauche** : les informations sur la date/nom/prénom en haut, le choix de la pharmacie en bas.  
 - **Colonne de droite** : en haut, un résumé du panier, et en dessous la liste des médicaments disponibles à l’achat.  
 
 L’aspect global est assez simple : un grand cadre pour l’application, avec un titre ou des labels indiquant clairement chaque bloc fonctionnel (informations patient, choix de pharmacie, panier, liste des médicaments).
+
+Infos supplémentaires :
+
+Rappel : date est juste un str au format 17/12/2005 alors que day est un Day (enum), le jour de la semaine
