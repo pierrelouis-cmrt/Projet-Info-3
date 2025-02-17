@@ -2,6 +2,11 @@ from enum import Enum
 from datetime import datetime
 import tkinter as tk
 from tkinter import messagebox
+import customtkinter
+
+# Choix du thème par défaut
+customtkinter.set_appearance_mode("Dark")  # Mode par défaut ("Dark" ou "Light")
+customtkinter.set_default_color_theme("blue")  # Thème de couleur (exemple : "blue", "green", etc.)
 
 # 1. Énumération Day avec les sept jours de la semaine
 class Day(Enum):
@@ -19,7 +24,7 @@ class DeliveryInfo:
         self._name = name
         self._first_name = first_name
         self._date = date_str
-        ## compute_day permet d'obtenir le jour à partir de la date
+        # compute_day permet d'obtenir le jour à partir de la date
         self._day = self.compute_day(date_str) if date_str else None
 
     def compute_day(self, date_str):
@@ -28,15 +33,13 @@ class DeliveryInfo:
         """
         try:
             date_obj = datetime.strptime(date_str, "%d/%m/%Y")
-            # weekday() retourne 0 pour Monday, 6 pour Sunday
-            weekday = date_obj.weekday()
+            weekday = date_obj.weekday()  # 0 pour Monday, 6 pour Sunday
             for day in Day:
                 if day.value == weekday:
                     return day
         except ValueError:
             return None
 
-    # Getters / Setters et méthode __str__
     def get_name(self):
         return self._name
     def set_name(self, name):
@@ -164,10 +167,13 @@ class MyPharmApp:
         self._cart = Cart()
         self._partner_set = PartnersSet()
 
+        # Variable de thème pour la commutation
+        self.theme_mode = customtkinter.get_appearance_mode()  # "Dark" ou "Light"
+
         # Création de données fictives pour la démonstration
         self.initialize_dummy_data()
 
-        # Mise en place de l'interface graphique
+        # Mise en place de l'interface graphique avec customtkinter
         self.setup_ui()
 
     def initialize_dummy_data(self):
@@ -201,52 +207,69 @@ class MyPharmApp:
         # Ajout des pharmacies au PartnersSet
         self._partner_set._existing_partners.extend([pharm1, pharm2, pharm3, pharm4])
 
+
     def setup_ui(self):
+        # --- Barre de titre avec bouton de changement de thème ---
+        self.top_frame = customtkinter.CTkFrame(self.root, corner_radius=10)
+        self.top_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 0), sticky="ew")
+        self.top_frame.grid_columnconfigure(0, weight=1)
+        title_label = customtkinter.CTkLabel(self.top_frame, text="Application de commande de médicaments", font=("Arial", 18, "bold"))
+        title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        self.theme_switch_button = customtkinter.CTkButton(self.top_frame, text="Switch Theme", command=self.toggle_theme, width=120)
+        self.theme_switch_button.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+
+        # Configuration de la grille principale pour les autres zones
+        self.root.grid_columnconfigure((0,1), weight=1)
+        self.root.grid_rowconfigure((1,2), weight=1)
+
         # --- Zone supérieure gauche : Informations patient ---
-        frame_info = tk.Frame(self.root, padx=10, pady=10, borderwidth=2, relief=tk.GROOVE)
-        frame_info.grid(row=0, column=0, sticky="nsew")
-
-        # Affichage de la date de commande
-        tk.Label(frame_info, text="Date de commande:").grid(row=0, column=0, sticky="w")
-        self.date_label = tk.Label(frame_info, text=datetime.now().strftime("%d/%m/%Y"))
-        self.date_label.grid(row=0, column=1, sticky="w")
-
+        self.frame_info = customtkinter.CTkFrame(self.root, corner_radius=10)
+        self.frame_info.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        # Date de commande
+        lbl_date_title = customtkinter.CTkLabel(self.frame_info, text="Date de commande:")
+        lbl_date_title.grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        self.date_label = customtkinter.CTkLabel(self.frame_info, text=datetime.now().strftime("%d/%m/%Y"))
+        self.date_label.grid(row=0, column=1, sticky="w", padx=10, pady=5)
         # Champ Nom
-        tk.Label(frame_info, text="Nom:").grid(row=1, column=0, sticky="w")
-        self.entry_nom = tk.Entry(frame_info)
-        self.entry_nom.grid(row=1, column=1, sticky="w")
-
+        lbl_nom = customtkinter.CTkLabel(self.frame_info, text="Nom:")
+        lbl_nom.grid(row=1, column=0, sticky="w", padx=10, pady=5)
+        self.entry_nom = customtkinter.CTkEntry(self.frame_info)
+        self.entry_nom.grid(row=1, column=1, sticky="w", padx=10, pady=5)
         # Champ Prénom
-        tk.Label(frame_info, text="Prénom:").grid(row=2, column=0, sticky="w")
-        self.entry_prenom = tk.Entry(frame_info)
-        self.entry_prenom.grid(row=2, column=1, sticky="w")
-
+        lbl_prenom = customtkinter.CTkLabel(self.frame_info, text="Prénom:")
+        lbl_prenom.grid(row=2, column=0, sticky="w", padx=10, pady=5)
+        self.entry_prenom = customtkinter.CTkEntry(self.frame_info)
+        self.entry_prenom.grid(row=2, column=1, sticky="w", padx=10, pady=5)
         # Bouton de validation (icône disquette)
-        self.btn_save = tk.Button(frame_info, text="💾", command=self.save_delivery_info)
-        self.btn_save.grid(row=3, column=0, columnspan=2, pady=5)
+        self.btn_save = customtkinter.CTkButton(self.frame_info, text="💾 Sauvegarder", command=self.save_delivery_info)
+        self.btn_save.grid(row=3, column=0, columnspan=2, pady=10)
 
         # --- Zone inférieure gauche : Choix de pharmacie ---
-        self.frame_pharma = tk.LabelFrame(self.root, text="Choix pharmacie", padx=10, pady=10)
-        self.frame_pharma.grid(row=1, column=0, sticky="nsew")
+        self.frame_pharma = customtkinter.CTkFrame(self.root, corner_radius=10)
+        self.frame_pharma.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+        lbl_pharma_title = customtkinter.CTkLabel(self.frame_pharma, text="Choix pharmacie", font=("Arial", 14, "bold"))
+        lbl_pharma_title.grid(row=0, column=0, padx=10, pady=(10,5), sticky="w")
         self.pharmacy_var = tk.IntVar(value=-1)        
         self.radio_buttons = []
-        # Pour initialiser, on déduit le jour actuel depuis la date affichée
         current_day = self._deliv_info.compute_day(self.date_label.cget("text"))
         self._partner_set.update_available_by_day(current_day)
         self.create_pharmacy_radio_buttons()
 
         # --- Zone supérieure droite : Panier ---
-        frame_cart = tk.LabelFrame(self.root, text="Panier", padx=10, pady=10)
-        frame_cart.grid(row=0, column=1, sticky="nsew")
-        self.cart_info = tk.Label(frame_cart, text="0 médicaments - Total: 0.0 €")
-        self.cart_info.pack()
+        self.frame_cart = customtkinter.CTkFrame(self.root, corner_radius=10)
+        self.frame_cart.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+        lbl_cart_title = customtkinter.CTkLabel(self.frame_cart, text="Panier", font=("Arial", 14, "bold"))
+        lbl_cart_title.pack(padx=10, pady=(10,5))
+        self.cart_info = customtkinter.CTkLabel(self.frame_cart, text="0 médicaments - Total: 0.0 €")
+        self.cart_info.pack(padx=10, pady=5)
 
-        # --- Zone principale à droite : Médicaments disponibles ---
-        frame_meds = tk.Frame(self.root, padx=10, pady=10, borderwidth=2, relief=tk.GROOVE)
-        frame_meds.grid(row=1, column=1, sticky="nsew")
-        tk.Label(frame_meds, text="Médicaments disponibles").pack()
-        self.med_list_frame = tk.Frame(frame_meds)
-        self.med_list_frame.pack()
+        # --- Zone principale inférieure droite : Médicaments disponibles ---
+        self.frame_meds = customtkinter.CTkFrame(self.root, corner_radius=10)
+        self.frame_meds.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
+        lbl_meds_title = customtkinter.CTkLabel(self.frame_meds, text="Médicaments disponibles", font=("Arial", 14, "bold"))
+        lbl_meds_title.pack(padx=10, pady=(10,5))
+        self.med_list_frame = customtkinter.CTkFrame(self.frame_meds, corner_radius=5)
+        self.med_list_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
     def create_pharmacy_radio_buttons(self):
         # Supprime les anciens boutons s'il y en a
@@ -254,21 +277,17 @@ class MyPharmApp:
             rb.destroy()
         self.radio_buttons.clear()
 
-        # Récupère la liste des pharmacies disponibles
         self.available_partners = self._partner_set.get_available_partners()
-
-        # Crée un bouton radio pour chaque pharmacie disponible
         for index, pharm in enumerate(self.available_partners):
-            rb = tk.Radiobutton(
-                self.frame_pharma,
+            rb = customtkinter.CTkRadioButton(
+                master=self.frame_pharma,
                 text=pharm.get_name(),
                 variable=self.pharmacy_var,
-                value=index,  # Affectation d'une valeur entière unique
+                value=index,
                 command=self.select_pharmacy
             )
-            rb.grid(row=index, column=0, sticky="w")
+            rb.grid(row=index+1, column=0, sticky="w", padx=15, pady=5)
             self.radio_buttons.append(rb)
-
 
     def save_delivery_info(self):
         """
@@ -283,7 +302,6 @@ class MyPharmApp:
         self._deliv_info.set_first_name(prenom)
         messagebox.showinfo("Infos", f"Infos enregistrées : {self._deliv_info}")
 
-        # Mise à jour des pharmacies disponibles selon le jour de livraison
         current_day = self._deliv_info.get_day()
         if current_day:
             self._partner_set.update_available_by_day(current_day)
@@ -305,32 +323,38 @@ class MyPharmApp:
     def update_medicines_display(self, pharmacy):
         """
         Affiche la liste des médicaments disponibles de la pharmacie sélectionnée.
-        Pour chaque médicament, un bouton 'Ajouter' permet de l'ajouter au panier.
         """
-        # Effacer l'ancienne liste
         for widget in self.med_list_frame.winfo_children():
             widget.destroy()
 
-        # Créer l'affichage pour chaque médicament
         for med in pharmacy.get_catalog():
-            med_frame = tk.Frame(self.med_list_frame)
-            med_frame.pack(fill="x", pady=2)
-            label = tk.Label(med_frame, text=med.get_name())
-            label.pack(side="left")
-            btn_add = tk.Button(med_frame, text="Ajouter", command=lambda m=med: self.add_medicine_to_cart(m))
-            btn_add.pack(side="right")
+            med_frame = customtkinter.CTkFrame(self.med_list_frame, corner_radius=5)
+            med_frame.pack(fill="x", padx=10, pady=5)
+            lbl_med = customtkinter.CTkLabel(med_frame, text=med.get_name())
+            lbl_med.pack(side="left", padx=10)
+            btn_add = customtkinter.CTkButton(med_frame, text="Ajouter", command=lambda m=med: self.add_medicine_to_cart(m))
+            btn_add.pack(side="right", padx=10)
 
     def add_medicine_to_cart(self, med):
         """
         Ajoute le médicament sélectionné au panier et met à jour l'affichage du panier.
         """
         self._cart.add_to_cart(med)
-        self.cart_info.config(
+        self.cart_info.configure(
             text=f"{self._cart.get_nb_med()} médicaments - Total: {self._cart.get_total_price()} €"
         )
 
+    def toggle_theme(self):
+        """
+        Change le thème entre Dark et Light.
+        """
+        # Bascule le mode d'apparence
+        new_mode = "Light" if self.theme_mode == "Dark" else "Dark"
+        customtkinter.set_appearance_mode(new_mode)
+        self.theme_mode = new_mode
+
 # --- Point d'entrée de l'application ---
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = customtkinter.CTk()
     app = MyPharmApp(root)
     root.mainloop()
