@@ -19,7 +19,7 @@ class DeliveryInfo:
         self._name = name
         self._first_name = first_name
         self._date = date_str
-        # compute_day permet d'obtenir le jour à partir de la date
+        ## compute_day permet d'obtenir le jour à partir de la date
         self._day = self.compute_day(date_str) if date_str else None
 
     def compute_day(self, date_str):
