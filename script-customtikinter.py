@@ -5,8 +5,8 @@ from tkinter import messagebox
 import customtkinter
 
 # Choix du thème par défaut
-customtkinter.set_appearance_mode("Dark")  # Mode par défaut ("Dark" ou "Light")
-customtkinter.set_default_color_theme("blue")  # Thème de couleur (exemple : "blue", "green", etc.)
+
+customtkinter.set_default_color_theme("farfelue.json")  # Thème de couleur (exemple : "blue", "green", etc.)
 
 # 1. Énumération Day avec les sept jours de la semaine
 class Day(Enum):
