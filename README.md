@@ -8,4 +8,4 @@ Pharmacie APP
 - [ ] vérifier respect des consignes
 - [ ] vérifications des similaritées
 - [ ] noms des pharmacies et médicaments
-- [ ] affichage des pharmacies uniquement apres la disquette
+- [x] affichage des pharmacies uniquement apres la disquette
