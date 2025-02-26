@@ -1,7 +1,7 @@
 from enum import Enum
 from datetime import datetime
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk, font
 
 # 1. Énumération Day avec les sept jours de la semaine
 class Day(Enum):
@@ -158,6 +158,13 @@ class MyPharmApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Application de commande de médicaments")
+        
+        # Configuration de base de la fenêtre
+        self.root.geometry("1100x600")
+        self.root.configure(bg="#f0f0f0")
+        
+        # Configuration des styles
+        self.setup_styles()
 
         # Instanciation des objets métier
         self._deliv_info = DeliveryInfo()
@@ -169,6 +176,28 @@ class MyPharmApp:
 
         # Mise en place de l'interface graphique
         self.setup_ui()
+
+    def setup_styles(self):
+        """Configure les styles pour l'interface utilisateur"""
+        # Configurer la police par défaut
+        default_font = font.nametofont("TkDefaultFont")
+        default_font.configure(family="Helvetica", size=10)
+        self.root.option_add("*Font", default_font)
+        
+        # Style pour ttk
+        self.style = ttk.Style()
+        self.style.configure("TLabel", background="#f0f0f0", foreground="#333333", padding=5)
+        self.style.configure("TFrame", background="#f0f0f0")
+        self.style.configure("TButton", background="#4a7abc", foreground="#000000", padding=5, font=("Helvetica", 10))
+        self.style.map("TButton",
+            background=[("active", "#5a8adc"), ("disabled", "#7FA1B7")],
+            foreground=[("active", "#4a7abc"), ("disabled", "#999999")])
+        
+        # Style pour les radiobuttons
+        self.style.configure("TRadiobutton", background="#f0f0f0", foreground="#4a7abc", padding=3)
+        
+        # Style pour le cart
+        self.style.configure("Cart.TLabel", background="#ACC4E7", foreground="#333333", padding=8, font=("Helvetica", 11, "bold"))
 
     def initialize_dummy_data(self):
         # Création de quelques médicaments avec des noms réalistes et amusants
@@ -202,56 +231,108 @@ class MyPharmApp:
         self._partner_set._existing_partners.extend([pharm1, pharm2, pharm3, pharm4])
 
     def setup_ui(self):
+        # Création des frames principales avec de meilleurs marges et séparations
+        main_frame = ttk.Frame(self.root, padding=10)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        left_frame = ttk.Frame(main_frame, padding=5)
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        right_frame = ttk.Frame(main_frame, padding=5)
+        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        
         # --- Zone supérieure gauche : Informations patient ---
-        frame_info = tk.Frame(self.root, padx=10, pady=10, borderwidth=2, relief=tk.GROOVE)
-        frame_info.grid(row=0, column=0, sticky="nsew")
+        frame_info = ttk.LabelFrame(left_frame, text="Informations patient", padding=10)
+        frame_info.pack(fill=tk.X, pady=5)
 
         # Affichage de la date de commande
-        tk.Label(frame_info, text="Date de commande:").grid(row=0, column=0, sticky="w")
-        self.date_label = tk.Label(frame_info, text=datetime.now().strftime("%d/%m/%Y"))
-        self.date_label.grid(row=0, column=1, sticky="w")
+        date_frame = ttk.Frame(frame_info)
+        date_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(date_frame, text="Date de commande:").pack(side=tk.LEFT, padx=5)
+        self.date_label = ttk.Label(date_frame, text=datetime.now().strftime("%d/%m/%Y"), 
+                                    style="TLabel", borderwidth=1, relief="solid", padding=5)
+        self.date_label.pack(side=tk.LEFT, padx=10)
 
         # Champ Nom
-        tk.Label(frame_info, text="Nom:").grid(row=1, column=0, sticky="w")
-        self.entry_nom = tk.Entry(frame_info)
-        self.entry_nom.grid(row=1, column=1, sticky="w")
+        nom_frame = ttk.Frame(frame_info)
+        nom_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(nom_frame, text="Nom:", width=10).pack(side=tk.LEFT, padx=5, anchor="w")
+        self.entry_nom = ttk.Entry(nom_frame, width=30)
+        self.entry_nom.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
 
         # Champ Prénom
-        tk.Label(frame_info, text="Prénom:").grid(row=2, column=0, sticky="w")
-        self.entry_prenom = tk.Entry(frame_info)
-        self.entry_prenom.grid(row=2, column=1, sticky="w")
+        prenom_frame = ttk.Frame(frame_info)
+        prenom_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(prenom_frame, text="Prénom:", width=10).pack(side=tk.LEFT, padx=5, anchor="w")
+        self.entry_prenom = ttk.Entry(prenom_frame, width=30)
+        self.entry_prenom.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
 
-        # Bouton de validation (icône disquette)
-        self.btn_save = tk.Button(frame_info, text="💾", command=self.save_delivery_info)
-        self.btn_save.grid(row=3, column=0, columnspan=2, pady=5)
+        # Bouton de validation avec meilleur style
+        save_frame = ttk.Frame(frame_info)
+        save_frame.pack(fill=tk.X, pady=10)
+        self.btn_save = ttk.Button(save_frame, text="Enregistrer", command=self.save_delivery_info)
+        self.btn_save.pack(padx=10, pady=5, anchor="center")
 
         # --- Zone inférieure gauche : Choix de pharmacie ---
-        self.frame_pharma = tk.LabelFrame(self.root, text="Choix pharmacie", padx=10, pady=10)
-        self.frame_pharma.grid(row=1, column=0, sticky="nsew")
+        self.frame_pharma = ttk.LabelFrame(left_frame, text="Choix de pharmacie", padding=10)
+        self.frame_pharma.pack(fill=tk.BOTH, expand=True, pady=5)
+        
         self.pharmacy_var = tk.IntVar(value=-1)        
         self.radio_buttons = []
+        
+        # Création d'un cadre défilant pour les pharmacies
+        self.pharma_canvas = tk.Canvas(self.frame_pharma, bg="#f0f0f0", highlightthickness=0)
+        self.pharma_scrollbar = ttk.Scrollbar(self.frame_pharma, orient=tk.VERTICAL, command=self.pharma_canvas.yview)
+        self.pharma_canvas.configure(yscrollcommand=self.pharma_scrollbar.set)
+        
+        self.pharma_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.pharma_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        self.pharma_list_frame = ttk.Frame(self.pharma_canvas)
+        self.pharma_canvas.create_window((0, 0), window=self.pharma_list_frame, anchor="nw")
+        self.pharma_list_frame.bind("<Configure>", lambda e: self.pharma_canvas.configure(scrollregion=self.pharma_canvas.bbox("all")))
+        
         # Pour initialiser, on déduit le jour actuel depuis la date affichée
         current_day = self._deliv_info.compute_day(self.date_label.cget("text"))
         self._partner_set.update_available_by_day(current_day)
         self.create_pharmacy_radio_buttons()
 
         # --- Zone supérieure droite : Panier ---
-        frame_cart = tk.LabelFrame(self.root, text="Panier", padx=10, pady=10)
-        frame_cart.grid(row=0, column=1, sticky="nsew")
-        self.cart_info = tk.Label(frame_cart, text="0 médicaments - Total: 0.0 €")
-        self.cart_info.pack()
+        frame_cart = ttk.LabelFrame(right_frame, text="Panier", padding=10)
+        frame_cart.pack(fill=tk.X, pady=5)
+        
+        # Amélioration de l'affichage du panier
+        self.cart_frame = ttk.Frame(frame_cart, padding=5)
+        self.cart_frame.pack(fill=tk.X, pady=5)
+        
+        self.cart_icon = ttk.Label(self.cart_frame, text="🛒", font=("Helvetica", 14))
+        self.cart_icon.pack(side=tk.LEFT, padx=5)
+        
+        self.cart_info = ttk.Label(self.cart_frame, 
+                                  text="0 médicaments - Total: 0.0 €", 
+                                  style="Cart.TLabel")
+        self.cart_info.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
 
         # --- Zone principale à droite : Médicaments disponibles ---
-        frame_meds = tk.Frame(self.root, padx=10, pady=10, borderwidth=2, relief=tk.GROOVE)
-        frame_meds.grid(row=1, column=1, sticky="nsew")
-        tk.Label(frame_meds, text="Médicaments disponibles").pack()
-        self.med_list_frame = tk.Frame(frame_meds)
-        self.med_list_frame.pack()
+        frame_meds = ttk.LabelFrame(right_frame, text="Médicaments disponibles", padding=10)
+        frame_meds.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        # Création d'un canvas avec scrollbar pour les médicaments
+        self.meds_canvas = tk.Canvas(frame_meds, bg="#f0f0f0", highlightthickness=0)
+        self.meds_scrollbar = ttk.Scrollbar(frame_meds, orient=tk.VERTICAL, command=self.meds_canvas.yview)
+        self.meds_canvas.configure(yscrollcommand=self.meds_scrollbar.set)
+        
+        self.meds_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.meds_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        self.med_list_frame = ttk.Frame(self.meds_canvas)
+        self.meds_canvas.create_window((0, 0), window=self.med_list_frame, anchor="nw")
+        self.med_list_frame.bind("<Configure>", lambda e: self.meds_canvas.configure(scrollregion=self.meds_canvas.bbox("all")))
 
     def create_pharmacy_radio_buttons(self):
         # Supprime les anciens boutons s'il y en a
-        for rb in self.radio_buttons:
-            rb.destroy()
+        for widget in self.pharma_list_frame.winfo_children():
+            widget.destroy()
         self.radio_buttons.clear()
 
         # Récupère la liste des pharmacies disponibles
@@ -259,16 +340,31 @@ class MyPharmApp:
 
         # Crée un bouton radio pour chaque pharmacie disponible
         for index, pharm in enumerate(self.available_partners):
-            rb = tk.Radiobutton(
-                self.frame_pharma,
+            # Création d'un cadre pour chaque pharmacie avec description
+            pharm_frame = ttk.Frame(self.pharma_list_frame, padding=5)
+            pharm_frame.pack(fill=tk.X, pady=2)
+            
+            rb = ttk.Radiobutton(
+                pharm_frame,
                 text=pharm.get_name(),
                 variable=self.pharmacy_var,
-                value=index,  # Affectation d'une valeur entière unique
+                value=index,
                 command=self.select_pharmacy
             )
-            rb.grid(row=index, column=0, sticky="w")
+            rb.pack(side=tk.LEFT, anchor="w")
             self.radio_buttons.append(rb)
-
+            
+            # Ajout de la description en dessous
+            desc_label = ttk.Label(self.pharma_list_frame, 
+                                  text=f"  {pharm.get_description()}", 
+                                  foreground="#666666", 
+                                  font=("Helvetica", 9, "italic"))
+            desc_label.pack(fill=tk.X, padx=25, pady=(0, 5))
+            
+            # Ajouter une ligne séparatrice sauf pour le dernier élément
+            if index < len(self.available_partners) - 1:
+                separator = ttk.Separator(self.pharma_list_frame, orient='horizontal')
+                separator.pack(fill=tk.X, padx=5, pady=5)
 
     def save_delivery_info(self):
         """
@@ -278,10 +374,16 @@ class MyPharmApp:
         nom = self.entry_nom.get()
         prenom = self.entry_prenom.get()
         date_str = self.date_label.cget("text")
+        
+        # Vérification des champs
+        if not nom or not prenom:
+            messagebox.showwarning("Informations incomplètes", "Veuillez remplir tous les champs.")
+            return
+            
         self._deliv_info.set_date(date_str)
         self._deliv_info.set_name(nom)
         self._deliv_info.set_first_name(prenom)
-        messagebox.showinfo("Infos", f"Infos enregistrées : {self._deliv_info}")
+        messagebox.showinfo("Informations enregistrées", f"Infos enregistrées : {self._deliv_info}")
 
         # Mise à jour des pharmacies disponibles selon le jour de livraison
         current_day = self._deliv_info.get_day()
@@ -312,22 +414,58 @@ class MyPharmApp:
             widget.destroy()
 
         # Créer l'affichage pour chaque médicament
-        for med in pharmacy.get_catalog():
-            med_frame = tk.Frame(self.med_list_frame)
-            med_frame.pack(fill="x", pady=2)
-            label = tk.Label(med_frame, text=med.get_name())
-            label.pack(side="left")
-            btn_add = tk.Button(med_frame, text="Ajouter", command=lambda m=med: self.add_medicine_to_cart(m))
-            btn_add.pack(side="right")
+        for i, med in enumerate(pharmacy.get_catalog()):
+            # Création d'un cadre pour chaque médicament
+            med_frame = ttk.Frame(self.med_list_frame, padding=5)
+            med_frame.pack(fill=tk.X, pady=5)
+            
+            # Icône de médicament
+            med_icon = ttk.Label(med_frame, text="💊", font=("Helvetica", 12))
+            med_icon.pack(side=tk.LEFT, padx=5)
+            
+            # Informations du médicament
+            info_frame = ttk.Frame(med_frame)
+            info_frame.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+            
+            name_label = ttk.Label(info_frame, text=med.get_name(), font=("Helvetica", 10, "bold"))
+            name_label.pack(anchor="w")
+            
+            desc_label = ttk.Label(info_frame, text=med.get_description(), wraplength=300)
+            desc_label.pack(anchor="w")
+            
+            price_label = ttk.Label(info_frame, text=f"{med.get_price()} €", foreground="#2c5282", font=("Helvetica", 10, "bold"))
+            price_label.pack(anchor="w")
+            
+            # Bouton d'ajout au panier
+            btn_frame = ttk.Frame(med_frame)
+            btn_frame.pack(side=tk.RIGHT, padx=5)
+            
+            btn_add = ttk.Button(btn_frame, text="Ajouter au panier", command=lambda m=med: self.add_medicine_to_cart(m))
+            btn_add.pack()
+            
+            # Ajout d'un séparateur entre les médicaments
+            if i < len(pharmacy.get_catalog()) - 1:
+                separator = ttk.Separator(self.med_list_frame, orient='horizontal')
+                separator.pack(fill=tk.X, padx=5, pady=5)
 
     def add_medicine_to_cart(self, med):
         """
         Ajoute le médicament sélectionné au panier et met à jour l'affichage du panier.
         """
         self._cart.add_to_cart(med)
-        self.cart_info.config(
-            text=f"{self._cart.get_nb_med()} médicaments - Total: {self._cart.get_total_price()} €"
-        )
+        total_price = self._cart.get_total_price()
+        nb_med = self._cart.get_nb_med()
+        
+        # Affichage amélioré du panier
+        cart_text = f"{nb_med} médicament{'s' if nb_med > 1 else ''} - Total: {total_price:.2f} €"
+        self.cart_info.config(text=cart_text)
+        
+        # Animation d'ajout
+        self.cart_info.configure(foreground="#4a7abc")
+        self.root.after(300, lambda: self.cart_info.configure(foreground="#333333"))
+        
+        # Notification d'ajout
+        messagebox.showinfo("Panier mis à jour", f"'{med.get_name()}' ajouté au panier.")
 
 # --- Point d'entrée de l'application ---
 if __name__ == "__main__":
