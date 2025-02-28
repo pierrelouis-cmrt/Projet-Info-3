@@ -175,7 +175,7 @@ class MyPharmApp:
         self._partner_set = PartnersSet()
         self._cart_details = {}  # Dictionnaire pour stocker les détails du panier
 
-        self.initialize_dummy_data()
+        self.fake_data()
 
         self.setup_ui()
 
@@ -200,7 +200,7 @@ class MyPharmApp:
         # Style pour le cart
         self.style.configure("Cart.TLabel", background="#ACC4E7", foreground="#333333", padding=8, font=("Helvetica", 11, "bold"))
 
-    def initialize_dummy_data(self):
+    def fake_data(self):
         med1 = Medicine("Dolomax 500", "Antidouleur puissant à base de paracétamol.", 8.5)
         med2 = Medicine("Grippofast", "Traitement contre les symptômes de la grippe.", 12.0)
         med3 = Medicine("NoToux", "Sirop antitussif à action rapide.", 7.5)
@@ -335,6 +335,7 @@ class MyPharmApp:
         self.meds_canvas.bind("<Enter>", lambda event: self._bind_to_mousewheel(self.meds_canvas))
         self.meds_canvas.bind("<Leave>", lambda event: self._unbind_from_mousewheel(self.meds_canvas))
 
+    # Bout de code qui permet d'utiliser la molette de la souris dans les canvas tkinter
     def _bind_to_mousewheel(self, canvas):
         canvas.bind_all("<MouseWheel>", lambda event: self._on_mousewheel(event, canvas))
 
