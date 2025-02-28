@@ -200,29 +200,29 @@ class MyPharmApp:
         # Style pour le cart
         self.style.configure("Cart.TLabel", background="#ACC4E7", foreground="#333333", padding=8, font=("Helvetica", 11, "bold"))
 
-    def fake_data(self):
-        med1 = Medicine("Dolomax 500", "Antidouleur puissant à base de paracétamol.", 8.5)
-        med2 = Medicine("Grippofast", "Traitement contre les symptômes de la grippe.", 12.0)
-        med3 = Medicine("NoToux", "Sirop antitussif à action rapide.", 7.5)
-        med4 = Medicine("DigestoZen", "Facilite la digestion et réduit les ballonnements.", 9.0)
-        med5 = Medicine("Calmoprax", "Anxiolytique léger pour le stress quotidien.", 14.0)
-        med6 = Medicine("Somnidor", "Favorise l'endormissement en douceur.", 11.0)
-        med7 = Medicine("Nezclair", "Spray nasal décongestionnant.", 6.5)
-        med8 = Medicine("Energik+", "Complément vitaminé pour réduire la fatigue.", 13.5)
+  def fake_data(self):
+        med1 = Medicine("Doliprane 500", "Antidouleur puissant à base de paracétamol.", 8.5)
+        med2 = Medicine("Tamiflu", "Traitement contre les symptômes de la grippe.", 12.0)
+        med3 = Medicine("Euphon", "Sirop contre la toux", 7.5)
+        med4 = Medicine("Suppositoire.", "Facilite la digestion et le transit", 9.0)
+        med5 = Medicine("Xanax", "Anxiolytique, medicament contre le stress", 14.0)
+        med6 = Medicine("Pediakid", "Favorise l'endrmissement", 11.0)
+        med7 = Medicine("Rhinadvil", "Spray nasal lutte contre le nez encombré.", 6.5)
+        med8 = Medicine("Vitamine C", "Complément vitaminé pour réduire la fatigue.", 13.5)
 
-        pharm1 = Pharmacy("Pharmacie Saint-Rémi", "Pharmacie centrale",
+        pharm1 = Pharmacy("Pharmacie Bellevue", "13 Pl. Bellevue, Pharmacie centrale",
                         open_days=[Day.Monday, Day.Tuesday, Day.Wednesday, Day.Thursday, Day.Friday],
                         catalog=[med1, med2, med7])
         
-        pharm2 = Pharmacy("Pharmacie des Collines", "Pharmacie située en périphérie",
+        pharm2 = Pharmacy("Pharmacie de la beraudiere", "27 Rue de la Beraudière, Pharmacie située en périphérie",
                         open_days=[Day.Wednesday, Day.Thursday, Day.Friday, Day.Saturday],
                         catalog=[med3, med4, med8])
         
-        pharm3 = Pharmacy("Pharmacie du Soleil", "Petite pharmacie ouverte le week-end",
+        pharm3 = Pharmacy("Pharmacie neyret fauriel", "67 Cr Fauriel, Petite pharmacie ouverte le week-end",
                         open_days=[Day.Saturday, Day.Sunday],
                         catalog=[med5, med6, med1])
         
-        pharm4 = Pharmacy("Pharmacie Express", "Pharmacie de garde ouverte tous les jours",
+        pharm4 = Pharmacy("Pharmacie carnot", "21 Rue Bergson, Pharmacie de garde ouverte tous les jours",
                         open_days=[Day.Monday, Day.Tuesday, Day.Wednesday, Day.Thursday, Day.Friday, Day.Saturday, Day.Sunday],
                         catalog=[med2, med3, med5, med6, med7])
         
