@@ -3,7 +3,7 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import messagebox, ttk, font
 
-# 1. Énumération Day avec les sept jours de la semaine
+# 1. Énumération Day
 class Day(Enum):
     Monday    = 0
     Tuesday   = 1
@@ -142,6 +142,12 @@ class Cart:
         self._nb_med += 1
         self._total_price += med.get_price()
 
+    def remove_from_cart(self, med):
+        if med in self._order:
+            self._order.remove(med)
+            self._nb_med -= 1
+            self._total_price -= med.get_price()
+
     def get_nb_med(self):
         return self._nb_med
     def get_total_price(self):
@@ -167,6 +173,7 @@ class MyPharmApp:
         self._deliv_info = DeliveryInfo()
         self._cart = Cart()
         self._partner_set = PartnersSet()
+        self._cart_details = {}  # Dictionnaire pour stocker les détails du panier
 
         self.initialize_dummy_data()
 
@@ -232,7 +239,7 @@ class MyPharmApp:
         right_frame = ttk.Frame(main_frame, padding=5)
         right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
         
-        # --- Zone supérieure gauche : Informations patient ---
+        # --- Zone supérieure gauche : Informations patient --- 
         frame_info = ttk.LabelFrame(left_frame, text="Informations patient", padding=10)
         frame_info.pack(fill=tk.X, pady=5)
 
@@ -271,7 +278,7 @@ class MyPharmApp:
         self.pharmacy_var = tk.IntVar(value=-1)        
         self.radio_buttons = []
         
-        # Création d'un cadre avec une scrollbar pour les pharmacies
+        # Création d'un canvas avec une scrollbar pour les pharmacies
         self.pharma_canvas = tk.Canvas(self.frame_pharma, bg="#f0f0f0", highlightthickness=0)
         self.pharma_scrollbar = ttk.Scrollbar(self.frame_pharma, orient=tk.VERTICAL, command=self.pharma_canvas.yview)
         self.pharma_canvas.configure(yscrollcommand=self.pharma_scrollbar.set)
@@ -282,6 +289,9 @@ class MyPharmApp:
         self.pharma_list_frame = ttk.Frame(self.pharma_canvas)
         self.pharma_canvas.create_window((0, 0), window=self.pharma_list_frame, anchor="nw")
         self.pharma_list_frame.bind("<Configure>", lambda e: self.pharma_canvas.configure(scrollregion=self.pharma_canvas.bbox("all")))
+        # Lorsqu'on entre dans la zone, on active le binding de la molette
+        self.pharma_canvas.bind("<Enter>", lambda event: self._bind_to_mousewheel(self.pharma_canvas))
+        self.pharma_canvas.bind("<Leave>", lambda event: self._unbind_from_mousewheel(self.pharma_canvas))
 
         # --- Zone supérieure droite : Panier ---
         frame_cart = ttk.LabelFrame(right_frame, text="Panier", padding=10)
@@ -297,8 +307,16 @@ class MyPharmApp:
                                   text="0 médicaments - Total: 0.0 €", 
                                   style="Cart.TLabel")
         self.cart_info.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
+        
+        # Nouvelle zone pour afficher le détail du panier
+        self.cart_details_frame = ttk.Frame(frame_cart, padding=5)
+        self.cart_details_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        # Bouton "Passer commande"
+        self.btn_order = ttk.Button(frame_cart, text="Passer commande", command=self.passer_commande)
+        self.btn_order.pack(pady=10)
 
-        # --- Zone inférieure à droite : Médicaments dispo ---
+        # --- Zone inférieure à droite : Médicaments disponibles ---
         frame_meds = ttk.LabelFrame(right_frame, text="Médicaments disponibles", padding=10)
         frame_meds.pack(fill=tk.BOTH, expand=True, pady=5)
         
@@ -313,6 +331,26 @@ class MyPharmApp:
         self.med_list_frame = ttk.Frame(self.meds_canvas)
         self.meds_canvas.create_window((0, 0), window=self.med_list_frame, anchor="nw")
         self.med_list_frame.bind("<Configure>", lambda e: self.meds_canvas.configure(scrollregion=self.meds_canvas.bbox("all")))
+        # Activation du binding de la molette pour la zone médicaments
+        self.meds_canvas.bind("<Enter>", lambda event: self._bind_to_mousewheel(self.meds_canvas))
+        self.meds_canvas.bind("<Leave>", lambda event: self._unbind_from_mousewheel(self.meds_canvas))
+
+    def _bind_to_mousewheel(self, canvas):
+        canvas.bind_all("<MouseWheel>", lambda event: self._on_mousewheel(event, canvas))
+
+    def _unbind_from_mousewheel(self, canvas):
+        canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event, canvas):
+        # Gestion sur Windows et autres plateformes
+        if event.delta:
+            canvas.yview_scroll(-int(event.delta/120), "units")
+        else:
+            # Pour les systèmes qui n'utilisent pas event.delta (ex: Linux)
+            if event.num == 4:
+                canvas.yview_scroll(-1, "units")
+            elif event.num == 5:
+                canvas.yview_scroll(1, "units")
 
     def create_pharmacy_radio_buttons(self):
         # Supprime les anciens boutons s'il y en a
@@ -345,7 +383,7 @@ class MyPharmApp:
                                   font=("Helvetica", 9, "italic"))
             desc_label.pack(fill=tk.X, padx=25, pady=(0, 5))
             
-            # Ajouter une ligne séparatrice sauf pour le dernier élément
+            # Ajouter un séparateur sauf pour le dernier élément
             if index < len(self.available_partners) - 1:
                 separator = ttk.Separator(self.pharma_list_frame, orient='horizontal')
                 separator.pack(fill=tk.X, padx=5, pady=5)
@@ -442,7 +480,104 @@ class MyPharmApp:
         self.cart_info.configure(foreground="#4a7abc")
         self.root.after(300, lambda: self.cart_info.configure(foreground="#333333"))
         
+        # Mise à jour du dictionnaire de détails du panier
+        active_pharmacy = self._partner_set.get_active_partner()
+        pharm_name = active_pharmacy.get_name() if active_pharmacy else "Inconnu"
+        if pharm_name not in self._cart_details:
+            self._cart_details[pharm_name] = {}
+        if med.get_name() not in self._cart_details[pharm_name]:
+            self._cart_details[pharm_name][med.get_name()] = {'med': med, 'quantity': 0}
+        self._cart_details[pharm_name][med.get_name()]['quantity'] += 1
+        
+        # Mise à jour de l'affichage détaillé du panier
+        self.update_cart_details()
+        
         messagebox.showinfo("Panier mis à jour", f"'{med.get_name()}' ajouté au panier.")
+
+    def update_cart_details(self):
+        """
+        Met à jour l'affichage détaillé du panier avec une liste à points des médicaments,
+        leur quantité, le prix unitaire et le total par médicament, groupés par pharmacie.
+        """
+        # Effacer le contenu précédent
+        for widget in self.cart_details_frame.winfo_children():
+            widget.destroy()
+        
+        # Afficher les détails du panier
+        for i, (pharm, meds) in enumerate(self._cart_details.items()):
+            pharm_label = ttk.Label(self.cart_details_frame, text=pharm, font=("Helvetica", 8, "italic"), foreground="#555555")
+            pharm_label.pack(anchor="w", pady=(5, 0))
+            for med_name, info in meds.items():
+                line_frame = ttk.Frame(self.cart_details_frame)
+                line_frame.pack(fill="x", padx=10, pady=2)
+                quantity = info['quantity']
+                unit_price = info['med'].get_price()
+                total_price = quantity * unit_price
+                med_text = f"• {med_name} x{quantity} - {unit_price:.2f} € chacun, total {total_price:.2f} €"
+                med_label = ttk.Label(line_frame, text=med_text, font=("Helvetica", 10))
+                med_label.pack(side=tk.LEFT, anchor="w")
+                # Bouton de retrait d'un exemplaire
+                remove_button = ttk.Button(line_frame, text="❌", width=3, command=lambda p=pharm, m=med_name: self.remove_medicine_from_cart(p, m))
+                remove_button.pack(side=tk.RIGHT)
+            # Séparateur entre pharmacies
+            if i < len(self._cart_details) - 1:
+                sep = ttk.Separator(self.cart_details_frame, orient='horizontal')
+                sep.pack(fill=tk.X, pady=5)
+
+    def remove_medicine_from_cart(self, pharm, med_name):
+        """
+        Retire un exemplaire du médicament indiqué depuis le panier.
+        """
+        info = self._cart_details.get(pharm, {}).get(med_name, None)
+        if info is not None and info['quantity'] > 0:
+            info['quantity'] -= 1
+            self._cart.remove_from_cart(info['med'])
+            if info['quantity'] <= 0:
+                del self._cart_details[pharm][med_name]
+            if not self._cart_details[pharm]:
+                del self._cart_details[pharm]
+            self.update_cart_details()
+            total_price = self._cart.get_total_price()
+            nb_med = self._cart.get_nb_med()
+            cart_text = f"{nb_med} médicament{'s' if nb_med > 1 else ''} - Total: {total_price:.2f} €"
+            self.cart_info.config(text=cart_text)
+
+    def passer_commande(self):
+        """
+        Affiche une fenêtre de dialogue avec un ticket de commande récapitulatif.
+        """
+        order_window = tk.Toplevel(self.root)
+        order_window.title("Ticket de commande")
+        order_window.geometry("400x500")
+        
+        ticket_lines = []
+        ticket_lines.append("=== Ticket de commande ===")
+        ticket_lines.append("")
+        ticket_lines.append("Informations patient:")
+        ticket_lines.append(f"Nom: {self._deliv_info.get_name()}")
+        ticket_lines.append(f"Prénom: {self._deliv_info.get_first_name()}")
+        ticket_lines.append(f"Date: {self._deliv_info.get_date()} ({self._deliv_info.get_day().name if self._deliv_info.get_day() else 'Inconnu'})")
+        ticket_lines.append("")
+        ticket_lines.append("Détails du panier:")
+        for pharm, meds in self._cart_details.items():
+            ticket_lines.append(f"Pharmacie: {pharm}")
+            for med_name, info in meds.items():
+                quantity = info['quantity']
+                unit_price = info['med'].get_price()
+                total_price = quantity * unit_price
+                ticket_lines.append(f"  • {med_name} x{quantity} - {unit_price:.2f} € chacun, total {total_price:.2f} €")
+            ticket_lines.append("")
+        ticket_lines.append(f"Total de la commande: {self._cart.get_total_price():.2f} €")
+        
+        ticket_text = "\n".join(ticket_lines)
+        
+        text_widget = tk.Text(order_window, wrap="word", font=("Helvetica", 10))
+        text_widget.insert("1.0", ticket_text)
+        text_widget.config(state="disabled")
+        text_widget.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        btn_close = ttk.Button(order_window, text="Fermer", command=order_window.destroy)
+        btn_close.pack(pady=10)
 
 # --- Point d'entrée de l'application ---
 if __name__ == "__main__":
