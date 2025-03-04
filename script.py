@@ -200,7 +200,7 @@ class MyPharmApp:
         # Style pour le cart
         self.style.configure("Cart.TLabel", background="#ACC4E7", foreground="#333333", padding=8, font=("Helvetica", 11, "bold"))
 
-  def fake_data(self):
+    def fake_data(self):
         med1 = Medicine("Doliprane 500", "Antidouleur puissant à base de paracétamol.", 8.5)
         med2 = Medicine("Tamiflu", "Traitement contre les symptômes de la grippe.", 12.0)
         med3 = Medicine("Euphon", "Sirop contre la toux", 7.5)
