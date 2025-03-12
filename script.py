@@ -13,13 +13,13 @@ class Day(Enum):
     Saturday  = 5
     Sunday    = 6
 
-# 2. Classe DeliveryInfo
+# 2.Classe DeliveryInfo
 class DeliveryInfo:
     def __init__(self, name="", first_name="", date_str=""):
         self._name = name
         self._first_name = first_name
         self._date = date_str
-        ## compute_day permet d'obtenir le jour à partir de la date
+        # compute_day permet d'obtnir le jour à partir de la date
         self._day = self.compute_day(date_str) if date_str else None
 
     def compute_day(self, date_str):
@@ -36,7 +36,6 @@ class DeliveryInfo:
         except ValueError:
             return None
 
-    # Getters / Setters et méthode __str__
     def get_name(self):
         return self._name
     def set_name(self, name):
@@ -77,7 +76,7 @@ class Medicine:
     def __str__(self):
         return f"{self._name} : {self._description} - {self._price} €"
 
-# 4. Classe Pharmacy
+# 4.Classe Pharmacy
 class Pharmacy:
     def __init__(self, name, description, open_days=None, catalog=None):
         self._name = name
@@ -159,7 +158,7 @@ class Cart:
         meds = ', '.join(med.get_name() for med in self._order)
         return f"{self._nb_med} médicaments ({meds}) - Total: {self._total_price} €"
 
-# 7. Classe MyPharmApp (Interface et orchestration)
+# 7. Classe MyPharmApp (Intreface et organisation des actions)
 class MyPharmApp:
     def __init__(self, root):
         self.root = root
@@ -173,19 +172,19 @@ class MyPharmApp:
         self._deliv_info = DeliveryInfo()
         self._cart = Cart()
         self._partner_set = PartnersSet()
-        self._cart_details = {}  # Dictionnaire pour stocker les détails du panier
+        self._cart_details = {}  # Dictionnaire qui stocke les détails du panier
 
         self.fake_data()
 
         self.setup_ui()
 
     def setup_styles(self):
-        """Configure les styles pour l'interface utilisateur"""
+        """Configure les styles au niveau de l'interface utilisateur"""
         default_font = font.nametofont("TkDefaultFont")
         default_font.configure(family="Helvetica", size=10)
         self.root.option_add("*Font", default_font)
         
-        # Style pour ttk
+        # Style ttk
         self.style = ttk.Style()
         self.style.configure("TLabel", background="#f0f0f0", foreground="#333333", padding=5)
         self.style.configure("TFrame", background="#f0f0f0")
@@ -194,15 +193,15 @@ class MyPharmApp:
             background=[("active", "#5a8adc"), ("disabled", "#7FA1B7")],
             foreground=[("active", "#4a7abc"), ("disabled", "#999999")])
         
-        # Style pour les radiobuttons
+        # Style des radio buttons
         self.style.configure("TRadiobutton", background="#f0f0f0", foreground="#4a7abc", padding=3)
         
-        # Style pour le cart
+        # Style du cart
         self.style.configure("Cart.TLabel", background="#ACC4E7", foreground="#333333", padding=8, font=("Helvetica", 11, "bold"))
 
     def fake_data(self):
-        med1 = Medicine("Doliprane 500", "Antidouleur puissant à base de paracétamol.", 8.5)
-        med2 = Medicine("Tamiflu", "Traitement contre les symptômes de la grippe.", 12.0)
+        med1 = Medicine("Doliprane 500", "Antidouleur puissant base sur du paracétamol.", 8.5)
+        med2 = Medicine("Tamiflu", "Traitement contre la grippe.", 12.0)
         med3 = Medicine("Euphon", "Sirop contre la toux", 7.5)
         med4 = Medicine("Suppositoire.", "Facilite la digestion et le transit", 9.0)
         med5 = Medicine("Xanax", "Anxiolytique, medicament contre le stress", 14.0)
@@ -226,7 +225,7 @@ class MyPharmApp:
                         open_days=[Day.Monday, Day.Tuesday, Day.Wednesday, Day.Thursday, Day.Friday, Day.Saturday, Day.Sunday],
                         catalog=[med2, med3, med5, med6, med7])
         
-        # Ajout des pharmacies au PartnersSet
+        # Ajoute les pharmacies au PartnersSet
         self._partner_set._existing_partners.extend([pharm1, pharm2, pharm3, pharm4])
 
     def setup_ui(self):
@@ -239,11 +238,11 @@ class MyPharmApp:
         right_frame = ttk.Frame(main_frame, padding=5)
         right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
         
-        # --- Zone supérieure gauche : Informations patient --- 
+        # -En haut a gauche : Informations patient -
         frame_info = ttk.LabelFrame(left_frame, text="Informations patient", padding=10)
         frame_info.pack(fill=tk.X, pady=5)
 
-        # Affichage de la date de commande
+        # Affiche la date de la commande
         date_frame = ttk.Frame(frame_info)
         date_frame.pack(fill=tk.X, pady=5)
         ttk.Label(date_frame, text="Date de commande:").pack(side=tk.LEFT, padx=5)
@@ -251,14 +250,14 @@ class MyPharmApp:
                                     style="TLabel", borderwidth=1, relief="solid", padding=5)
         self.date_label.pack(side=tk.LEFT, padx=10)
 
-        # Champ Nom
+        # Champ pour rentrer le Nom
         nom_frame = ttk.Frame(frame_info)
         nom_frame.pack(fill=tk.X, pady=5)
         ttk.Label(nom_frame, text="Nom:", width=10).pack(side=tk.LEFT, padx=5, anchor="w")
         self.entry_nom = ttk.Entry(nom_frame, width=30)
         self.entry_nom.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
 
-        # Champ Prénom
+        # Champ pour rentrer le Prénom
         prenom_frame = ttk.Frame(frame_info)
         prenom_frame.pack(fill=tk.X, pady=5)
         ttk.Label(prenom_frame, text="Prénom:", width=10).pack(side=tk.LEFT, padx=5, anchor="w")
@@ -271,14 +270,14 @@ class MyPharmApp:
         self.btn_save = ttk.Button(save_frame, text="Enregistrer", command=self.save_delivery_info)
         self.btn_save.pack(padx=10, pady=5, anchor="center")
 
-        # --- Zone inférieure gauche : Choix de pharmacie ---
+        # - En bas a gauche : Choix de la pharmacie -
         self.frame_pharma = ttk.LabelFrame(left_frame, text="Choix de pharmacie", padding=10)
         self.frame_pharma.pack(fill=tk.BOTH, expand=True, pady=5)
         
         self.pharmacy_var = tk.IntVar(value=-1)        
         self.radio_buttons = []
         
-        # Création d'un canvas avec une scrollbar pour les pharmacies
+        # Création d'un cadre avec un scrollbar pour faire defiller les pharmacies
         self.pharma_canvas = tk.Canvas(self.frame_pharma, bg="#f0f0f0", highlightthickness=0)
         self.pharma_scrollbar = ttk.Scrollbar(self.frame_pharma, orient=tk.VERTICAL, command=self.pharma_canvas.yview)
         self.pharma_canvas.configure(yscrollcommand=self.pharma_scrollbar.set)
@@ -293,7 +292,7 @@ class MyPharmApp:
         self.pharma_canvas.bind("<Enter>", lambda event: self._bind_to_mousewheel(self.pharma_canvas))
         self.pharma_canvas.bind("<Leave>", lambda event: self._unbind_from_mousewheel(self.pharma_canvas))
 
-        # --- Zone supérieure droite : Panier ---
+        # -En haut a droite : Panier --
         frame_cart = ttk.LabelFrame(right_frame, text="Panier", padding=10)
         frame_cart.pack(fill=tk.X, pady=5)
         
@@ -308,7 +307,7 @@ class MyPharmApp:
                                   style="Cart.TLabel")
         self.cart_info.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
         
-        # Nouvelle zone pour afficher le détail du panier
+        # Creation d une zone qui affiche le détail du panier
         self.cart_details_frame = ttk.Frame(frame_cart, padding=5)
         self.cart_details_frame.pack(fill=tk.BOTH, expand=True, pady=5)
         
@@ -316,11 +315,11 @@ class MyPharmApp:
         self.btn_order = ttk.Button(frame_cart, text="Passer commande", command=self.passer_commande)
         self.btn_order.pack(pady=10)
 
-        # --- Zone inférieure à droite : Médicaments disponibles ---
+        # - En bas à droite : Médicaments disponibles -
         frame_meds = ttk.LabelFrame(right_frame, text="Médicaments disponibles", padding=10)
         frame_meds.pack(fill=tk.BOTH, expand=True, pady=5)
         
-        # Création d'un canvas avec scrollbar pour les médicaments
+        # Création d'un cadre avec scrollbar qui permet de faire defiler les médicaments
         self.meds_canvas = tk.Canvas(frame_meds, bg="#f0f0f0", highlightthickness=0)
         self.meds_scrollbar = ttk.Scrollbar(frame_meds, orient=tk.VERTICAL, command=self.meds_canvas.yview)
         self.meds_canvas.configure(yscrollcommand=self.meds_scrollbar.set)
@@ -331,7 +330,7 @@ class MyPharmApp:
         self.med_list_frame = ttk.Frame(self.meds_canvas)
         self.meds_canvas.create_window((0, 0), window=self.med_list_frame, anchor="nw")
         self.med_list_frame.bind("<Configure>", lambda e: self.meds_canvas.configure(scrollregion=self.meds_canvas.bbox("all")))
-        # Activation du binding de la molette pour la zone médicaments
+        # Fonction qui permet le defilement des médicaments grace a la molette
         self.meds_canvas.bind("<Enter>", lambda event: self._bind_to_mousewheel(self.meds_canvas))
         self.meds_canvas.bind("<Leave>", lambda event: self._unbind_from_mousewheel(self.meds_canvas))
 
@@ -377,22 +376,22 @@ class MyPharmApp:
             rb.pack(side=tk.LEFT, anchor="w")
             self.radio_buttons.append(rb)
             
-            # Ajout de la description en dessous
+            # Ajoute la description en dessous de chaque pharmacies
             desc_label = ttk.Label(self.pharma_list_frame, 
                                   text=f"  {pharm.get_description()}", 
                                   foreground="#666666", 
                                   font=("Helvetica", 9, "italic"))
             desc_label.pack(fill=tk.X, padx=25, pady=(0, 5))
             
-            # Ajouter un séparateur sauf pour le dernier élément
+            # Ajoute un séparateur sauf pour le dernier élément
             if index < len(self.available_partners) - 1:
                 separator = ttk.Separator(self.pharma_list_frame, orient='horizontal')
                 separator.pack(fill=tk.X, padx=5, pady=5)
 
     def save_delivery_info(self):
         """
-        Récupère les informations saisies et les sauvegarde dans l'objet DeliveryInfo.
-        Puis, met à jour la liste des pharmacies disponibles en fonction du jour.
+        Récupère les informations saisies et les sauvegarde dans l'objet DeliveryInfo
+        puis, la fonction met à jour la liste des pharmacies disponibles en fonction du jour.
         """
         nom = self.entry_nom.get()
         prenom = self.entry_prenom.get()
@@ -429,14 +428,14 @@ class MyPharmApp:
 
     def update_medicines_display(self, pharmacy):
         """
-        Affiche la liste des médicaments disponibles de la pharmacie sélectionnée.
-        Pour chaque médicament, un bouton 'Ajouter' permet de l'ajouter au panier.
+        Affiche la liste des médicaments disponibles de la pharmacie sélectionnée 
+        et fait en sorte que pour chaque médicament, un bouton 'Ajouter' permette de l'ajouter au panier.
         """
-        # Effacer l'ancienne liste
+        # Efface l'ancienne liste
         for widget in self.med_list_frame.winfo_children():
             widget.destroy()
 
-        # Créer l'affichage pour chaque médicament
+        # Crée l'affichage pour chaque médicament
         for i, med in enumerate(pharmacy.get_catalog()):
             med_frame = ttk.Frame(self.med_list_frame, padding=5)
             med_frame.pack(fill=tk.X, pady=5)
@@ -469,7 +468,7 @@ class MyPharmApp:
 
     def add_medicine_to_cart(self, med):
         """
-        Ajoute le médicament sélectionné au panier et met à jour l'affichage du panier.
+        Ajoute le médicament sélectionné au panier et met à jour l'affichage du panier
         """
         self._cart.add_to_cart(med)
         total_price = self._cart.get_total_price()
@@ -481,7 +480,7 @@ class MyPharmApp:
         self.cart_info.configure(foreground="#4a7abc")
         self.root.after(300, lambda: self.cart_info.configure(foreground="#333333"))
         
-        # Mise à jour du dictionnaire de détails du panier
+        # Met à jour le dictionnaire sur les détails du panier
         active_pharmacy = self._partner_set.get_active_partner()
         pharm_name = active_pharmacy.get_name() if active_pharmacy else "Inconnu"
         if pharm_name not in self._cart_details:
@@ -490,7 +489,7 @@ class MyPharmApp:
             self._cart_details[pharm_name][med.get_name()] = {'med': med, 'quantity': 0}
         self._cart_details[pharm_name][med.get_name()]['quantity'] += 1
         
-        # Mise à jour de l'affichage détaillé du panier
+        # Met à jour l'affichage détaillé du panier
         self.update_cart_details()
         
         messagebox.showinfo("Panier mis à jour", f"'{med.get_name()}' ajouté au panier.")
@@ -498,13 +497,13 @@ class MyPharmApp:
     def update_cart_details(self):
         """
         Met à jour l'affichage détaillé du panier avec une liste à points des médicaments,
-        leur quantité, le prix unitaire et le total par médicament, groupés par pharmacie.
+        leur quantité, le prix de chauqe médicament et le total par médicament, groupés par pharmacie.
         """
-        # Effacer le contenu précédent
+        # Efface le contenu précédent
         for widget in self.cart_details_frame.winfo_children():
             widget.destroy()
         
-        # Afficher les détails du panier
+        # Affiche les détails du panier
         for i, (pharm, meds) in enumerate(self._cart_details.items()):
             pharm_label = ttk.Label(self.cart_details_frame, text=pharm, font=("Helvetica", 8, "italic"), foreground="#555555")
             pharm_label.pack(anchor="w", pady=(5, 0))
@@ -527,7 +526,7 @@ class MyPharmApp:
 
     def remove_medicine_from_cart(self, pharm, med_name):
         """
-        Retire un exemplaire du médicament indiqué depuis le panier.
+        Retire un exemplaire du médicament indiqué du panier.
         """
         info = self._cart_details.get(pharm, {}).get(med_name, None)
         if info is not None and info['quantity'] > 0:
@@ -580,7 +579,7 @@ class MyPharmApp:
         btn_close = ttk.Button(order_window, text="Fermer", command=order_window.destroy)
         btn_close.pack(pady=10)
 
-# --- Point d'entrée de l'application ---
+# - Point d'entrée de l'application-
 if __name__ == "__main__":
     root = tk.Tk()
     app = MyPharmApp(root)
